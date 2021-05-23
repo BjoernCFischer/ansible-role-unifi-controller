@@ -9,29 +9,29 @@
   apt:
     name: "{{ unifi_package_dependencies }}"
     state: present
-  become: yes
+  become: true
 
 - name: install ubnt apt key
   apt_key:
     keyserver: "{{ unifi_repo_key_server }}"
     id: "{{ unifi_repo_key_id }}"
-  become: yes
+  become: true
 
 - name: install ubnt apt repository
   apt_repository:
     filename: "{{ unifi_repo_name }}"
     repo: "{{ unifi_repo_url }}"
     state: "{{ unifi_repo_state }}"
-  become: yes
+  become: true
   when: ansible_os_family == "Debian"
 
 - name: install unifi-controller packages
   apt:
-    allow_unauthenticated: yes
+    allow_unauthenticated: true
     name: "{{ unifi_packages }}"
     state: "{{ unifi_packages_state }}"
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
   notify:
     - restart unifi
 
@@ -40,33 +40,52 @@
     url: "{{ unifi_java_snappy_url }}"
     checksum: "{{ unifi_java_snappy_checksum }}"
     dest: "{{ unifi_java_snappy_file }}"
-  become: yes
+  become: true
   notify:
     - restart unifi
-
-- name: disable mongodb default instance
-  lineinfile:
-    path: '{{ unifi_mongodb_config }}'
-    regexp: '^ENABLE_MONGODB='
-    line: 'ENABLE_MONGODB=no'
-  become: yes
-  notify:
-    - restart mongodb
 
 - name: configure java for unifi
   lineinfile:
-    create: yes
+    create: true
     path: '{{ unifi_config_file }}'
     regexp: '^JAVA_HOME='
     line: 'JAVA_HOME={{ unifi_java_home }}'
-  become: yes
+  become: true
   notify:
     - restart unifi
 
-- name: manage services
+- name: manage unifi services
   service:
     name: "{{ item }}"
     state: "{{ unifi_services_state }}"
     enabled: "{{ unifi_services_enabled }}"
-  become: yes
+  become: true
   with_items: "{{ unifi_services }}"
+
+- name: stop and disable mongodb services
+  service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  become: true
+  with_items: "{{ unifi_mongodb_services }}"
+
+- name: bind unifi mongodb to 127.0.0.1 instead of localhost (db.mongo.uri)
+  lineinfile:
+    path: '{{ unifi_system_properties }}'
+    regexp: '^db.mongo.uri='
+    line: 'db.mongo.uri=mongodb://127.0.0.1:27117/unifi'
+  become: true
+  when:
+  notify:
+    - restart unifi
+
+- name: bind unifi mongodb to 127.0.0.1 instead of localhost (statdb.mongo.uri)
+  lineinfile:
+    path: '{{ unifi_system_properties }}'
+    regexp: '^statdb.mongo.uri='
+    line: 'statdb.mongo.uri=mongodb://127.0.0.1:27117/unifi_stat'
+  become: true
+  when:
+  notify:
+    - restart unifi

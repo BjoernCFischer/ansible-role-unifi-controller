@@ -1,9 +1,18 @@
-# nephelaiio.unifi-controller
+#  BjoernCFischer.unifi-controller
 
-[![Build Status](https://github.com/nephelaiio/ansible-role-unifi-controller/workflows/CI/badge.svg)](https://github.com/nephelaiio/ansible-role-unifi-controller/actions)
-[![Ansible Galaxy](http://img.shields.io/badge/ansible--galaxy-nephelaiio.unifi-controller-blue.svg)](https://galaxy.ansible.com/nephelaiio/unifi-controller/)
+An ansible role to install and configure [Ubiquiti Unifi Controller](https://www.ubnt.com/enterprise/software/)
 
-An [ansible role](https://galaxy.ansible.com/nephelaiio/unifi-controller) to install and configure [Ubiquiti Unifi Controller](https://www.ubnt.com/enterprise/software/)
+## History
+
+The role was forked from [nephelaiio's unifi-controller role](https://github.com/nephelaiio/ansible-role-unifi-controller/). 
+
+__2021-05-24__
+
+Changes for improved Raspberry Pi support:
+  * System's mongodb service is stopped and disabled
+  * [Workaround](https://community.ui.com/questions/UniFi-controller-cant-connect-to-MongoDB-if-localhost-is-1/a403a2ee-b5f5-430a-834e-21045f35054f) for systems with IPv6 localhost (::1) is applied
+
+No unit tests were changed.
 
 ## Role Variables
 
@@ -19,7 +28,7 @@ Unifi installation on regular x86_64 hardware
      - role: unifi-controller
 ```
 
-Unifi installation on raspberry pi 3
+Unifi installation on raspberry pi
 ```
 - hosts: unifi
   roles:

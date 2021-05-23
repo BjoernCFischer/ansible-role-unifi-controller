@@ -5,10 +5,3 @@
     state: restarted
   become: yes
   with_items: "{{ unifi_services }}"
-
-- name: restart mongodb
-  service:
-    name: "{{ item }}"
-    state: restarted
-  become: yes
-  with_items: "{{ unifi_mongodb_services }}"
